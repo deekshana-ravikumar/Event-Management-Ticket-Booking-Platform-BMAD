@@ -2,7 +2,7 @@
 
 **Project:** Smart Event Management & Ticket Booking Platform
 **Owner:** John (PM)
-**Date:** 2026-05-05
+**Date:** 2026-05-05 · **Revised:** 2026-05-06 (BA validation + V1 booking model lock)
 
 ---
 
@@ -14,7 +14,7 @@ Scoring: **L** (Likelihood 1-5) × **I** (Impact 1-5) = **R** (Risk Score). Anyt
 
 | ID | Risk | L | I | R | Owner | Mitigation |
 |----|------|---|---|---|-------|-----------|
-| **DR-01** | **No payment gateway in V1 → organizer rejection** | 4 | 5 | **20** | PM | Position V1 as free pilot; sign first 5 organizers as pilot partners with explicit Phase 2 commitment; "Reserved/Pay-Later" clearly marked |
+| **DR-01** | **No payment gateway in V1 → organizer rejection / paid-event confusion** | 4 | 5 | **20** | PM | V1 positioned as free events / informational pricing only. Onboarding banner + T&C explicitly states "no money is collected on this platform in V1." Sign first 5 organizers as pilot partners with explicit V2 payment commitment. UI hides any payment-status field; price field labeled "Display Price (informational)". |
 | **DR-02** | **Email deliverability — booking confirmations land in spam** | 4 | 5 | **20** | BE Lead | Set up SPF/DKIM/DMARC on day 1 of S1; use reputable SMTP (Brevo / SES / Sendinblue); monitor bounce rate; send confirmations from a domain matching the platform |
 | **DR-03** | **Atomic inventory implementation bug → overselling** | 3 | 5 | **15** | Architect | Architect signs off on locking pattern before S5; load test in S5 with 100 concurrent confirmations on same category; explicit overselling test in CI |
 | **DR-04** | **Underestimated team velocity → MVP slips** | 4 | 4 | **16** | PM | Re-baseline after S2; cut Should-Haves to V1.1 aggressively; shrink scope before extending timeline |
@@ -33,7 +33,9 @@ Scoring: **L** (Likelihood 1-5) × **I** (Impact 1-5) = **R** (Risk Score). Anyt
 | DR-12 | Coupon abuse (mass account creation to redeem) | 3 | 3 | 9 | Enforce per-user limit + minimum booking amount; rate-limit coupon validation API; phone number captured for fraud detection |
 | DR-13 | Organizer publishes inappropriate event content | 3 | 3 | 9 | Admin can close event with cause; T&C clearly forbids; reactive moderation acceptable in V1 |
 | DR-14 | Time zone bugs (server UTC vs IST display) | 3 | 3 | 9 | Backend uses DateTimeOffset; explicit UTC storage; UI converts; CI test on date-boundary edge cases |
-| DR-15 | "Reserved/Pay-Later" creates phantom inventory hoarding | 3 | 4 | 12 | Add per-user active-reservation cap (PM challenge in PM-01 §3); track no-show rate per organizer |
+| ~~DR-15~~ | ~~"Reserved/Pay-Later" creates phantom inventory hoarding~~ — **REMOVED 2026-05-06**: V1 booking model now instant-confirm only; no reservation state exists. Replaced by **DR-15-NEW** below. | — | — | — | — |
+| **DR-15-NEW** | **Free-event hoarding under instant-confirm** (one user grabs many tickets) | 4 | 3 | **12** | Backend Lead | Enforce **BR-NEW-01** per-attendee per-event cap (default 10) inside US-E5-005 atomic confirm transaction. Configurable per organizer in V1.1. Audit log per booking creation enables post-hoc fraud detection. |
+| **DR-21** | 🆕 **DPDP Act non-compliance** (consent capture, data subject rights) | 2 | 4 | **8** | PM + BE Lead | US-E10-008 consent ledger ships in S1; data export + deletion (US-E10-009/010) ship in V1.1; Privacy Policy aligns with DPDP language; document admin-mediated export/deletion process for V1 to satisfy on-request requests. |
 
 ### Tier 3 — Watch List (R ≤ 6)
 
@@ -57,6 +59,10 @@ Scoring: **L** (Likelihood 1-5) × **I** (Impact 1-5) = **R** (Risk Score). Anyt
 | OD-04 | Privacy Policy + T&C content | Pre-Beta | Stakeholder must source |
 | OD-05 | First 5 seed organizers | Pre-S6 | PM identifies via outreach by start of S6 |
 | OD-06 | JWT signing algorithm | Architect call (pre-S1) | Recommend HS256 for V1 (single API); RS256 only if Phase 2 splits services |
+| ~~OD-07~~ | ~~Paid events: enforce price=0 vs informational~~ | ✅ **CLOSED 2026-05-06** | **Decision: Informational price only.** Organizers may set price > 0 but no money is collected by the platform. UI labels field "Display Price (informational)". T&C makes this explicit. No payment-status field anywhere. |
+| ~~OD-08~~ | ~~Per-attendee per-event ticket cap value~~ | ✅ **CLOSED 2026-05-06** | **Decision: 10 tickets/attendee/event in V1**, hardcoded. Configurable per event by organizer in V1.1. Codified as BR-NEW-01. |
+| OD-09 | DPDP scope: ship consent ledger in V1, defer export/delete to V1.1? | ✅ **CLOSED 2026-05-06** | **Yes** — US-E10-008 ships S1 (MVP P0); US-E10-009/010 V1.1. Manual admin process for V1 export/delete requests. |
+| OD-10 | Sprint count: 8 vs 9 | ✅ **CLOSED 2026-05-06** | **9 sprints** (per revised PM-05). Absorbs scope additions + realistic check-in complexity. |
 
 ---
 
@@ -115,6 +121,20 @@ Never plan a sprint at 100% capacity. 20% buffer absorbs:
 ### Recommendation 10 — Plan the Cut-Over to V2 Now
 The biggest single risk to **product success** isn't V1 quality — it's the V1 → V2 jump (adding payments). Architect must design with payment hooks in V1 (already in NFRs and DB schema reserved columns). PM tracks this as a non-functional acceptance criterion: *"V2 payment integration requires zero schema migration on existing tables."*
 
+**Concrete V1 → V2 hooks (architect must enforce):**
+- `Booking` row reserves nullable `PaymentIntentId`, `PaymentStatus`, `AmountPaid`, `PaidAt` columns — unused in V1, ready for V2.
+- Booking state machine in V1 has only `Confirmed | Cancelled`. V2 adds `Reserved | PaymentFailed` *as new states*, never re-purposing existing ones.
+- All booking write paths flow through `IBookingService.Confirm(...)` so V2 can wrap with payment orchestration without touching call sites.
+- T&C v1 contains a one-line forward statement: *"Payment processing will be added in a future version."*
+
+### Recommendation 11 — DPDP & Audit Discipline from Day 1
+Because we now ship the consent ledger (US-E10-008) in S1 and audit infra (US-E2-010) in S2, every story from S2 onward must:
+1. Write to audit log on any state-change action (organizer state, booking confirm/cancel, scan attempt, admin action).
+2. Reference T&C version + consent ID where user action implies consent (signup, booking confirm).
+3. Treat PII (name, email, phone) with structured-log redaction by default.
+
+Make this a **PR checklist item**, not a separate ticket. Cheaper now than a compliance retrofit.
+
 ---
 
 ## 5. Go / No-Go Decision Framework
@@ -152,14 +172,18 @@ The biggest single risk to **product success** isn't V1 quality — it's the V1 
 
 ---
 
-## 7. Final PM Verdict on Project Health
+## 7. Final PM Verdict on Project Health (Revised 2026-05-06)
 
 🟢 **Green for build kickoff** with these conditions:
-1. Architect on board before Sprint 1 (Open Decision OD-06)
+1. Architect on board before Sprint 1 (Open Decision OD-06 — JWT algorithm)
 2. SMTP + VPS chosen before Sprint 1 (OD-01, OD-02)
 3. Stakeholder commits to weekly demo cadence
-4. Privacy/T&C content pipeline started in Sprint 4 (Open Decision OD-04)
-5. PM owns the seed-organizer pipeline starting Sprint 4 (Open Decision OD-05)
+4. Privacy/T&C content pipeline started in Sprint 4 (OD-04)
+5. PM owns the seed-organizer pipeline starting Sprint 4 (OD-05)
+6. **All booking stories implemented strictly per [PM-01 §0 V1 Booking Model](pm-01-mvp-boundary-and-prioritization.md#0-v1-booking-model--locked-mandatory)** — instant confirm only, no payment, no reservation, BR-NEW-01 cap enforced atomically.
+7. **DPDP consent ledger (US-E10-008) ships in Sprint 1**, not deferred.
+
+Closed decisions (2026-05-06): OD-07 (informational price), OD-08 (cap=10), OD-09 (DPDP scope), OD-10 (9 sprints).
 
 Without any of (1) (2) (3) — **delay coding until resolved.** The cost of a 1-week delay is far less than the cost of restarting a sprint.
 

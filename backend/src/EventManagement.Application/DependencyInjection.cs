@@ -1,0 +1,23 @@
+using EventManagement.Application.Common.Behaviors;
+using EventManagement.Application.Common.Settings;
+using FluentValidation;
+using MediatR;
+using Microsoft.Extensions.DependencyInjection;
+
+namespace EventManagement.Application;
+
+public static class DependencyInjection
+{
+    public static IServiceCollection AddApplication(this IServiceCollection services)
+    {
+        var assembly = typeof(DependencyInjection).Assembly;
+
+        services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(assembly));
+
+        services.AddValidatorsFromAssembly(assembly);
+
+        services.AddTransient(typeof(IPipelineBehavior<,>), typeof(ValidationBehavior<,>));
+
+        return services;
+    }
+}

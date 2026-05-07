@@ -2,14 +2,39 @@
 
 **Project:** Smart Event Management & Ticket Booking Platform
 **Owner:** John (PM)
-**Date:** 2026-05-05
+**Date:** 2026-05-05 · **Revised:** 2026-05-06 (BA validation + V1 booking model lock)
+
+---
+
+## 0. V1 Booking Model — LOCKED (Mandatory)
+
+🔴 **Final, non-negotiable for V1:**
+
+- **No payment gateway, no payment intent, no payment status, no refund logic, no transaction ledger.**
+- **No "Reserved", "Pending Payment", "Pay Later", or "Hold" state.** Booking has exactly two terminal states: `Confirmed` or `Cancelled`.
+- **All bookings are instant confirmation.** Inventory decrements atomically the moment the user clicks Confirm.
+- **Ticket price is informational only** (free-readiness for V2). UI displays ₹ amount; no money is exchanged inside the platform.
+- **QR ticket generated immediately** on confirm; confirmation page rendered; confirmation email + PDF dispatched async.
+- **Cancellation** (≥24 h before event) restores inventory; no refund computation occurs.
+
+**Final V1 booking flow** (canonical — referenced by all downstream artifacts):
+1. Attendee selects event
+2. Selects ticket category(ies) + quantity (subject to per-attendee per-event cap, see BR-NEW-01)
+3. Optionally applies one coupon
+4. Provides per-ticket attendee names + accepts T&C
+5. Clicks **Confirm Booking**
+6. System atomically: validates inventory + cap → decrements inventory → creates Booking + Tickets → generates HMAC QR per ticket → records consent → returns `BK-YYYY-NNNNNN`
+7. Confirmation page shown with downloadable QRs
+8. Async: confirmation email with PDF e-ticket sent
+
+**BR-NEW-01 (replaces phantom "reservation cap"):** Per attendee, per event, **max 10 tickets total across all categories** in V1. Enforced inside the atomic confirm transaction. Configurable per event by organizer in V1.1.
 
 ---
 
 ## 1. MVP Definition (Product Manager's Lens)
 
 **MVP Hypothesis:**
-> *Small-to-mid Indian event organizers will adopt a free, centralized digital platform to publish events, sell tickets (or register attendees), and validate entry via QR — even without integrated online payment — IF the workflow is materially faster than their current spreadsheet+WhatsApp+manual-ticket setup.*
+> *Small-to-mid Indian event organizers will adopt a free, centralized digital platform to publish events, register attendees, and validate entry via QR — even without integrated online payment — IF the workflow is materially faster than their current spreadsheet+WhatsApp+manual-ticket setup.*
 
 **MVP succeeds if (6 months):**
 - ≥ 100 organizers approved AND ≥ 30 of them publish ≥ 1 event AND repeat (publish a 2nd event)
@@ -30,20 +55,23 @@ The minimum coherent product. Removing any of these breaks the core value loop.
 | Capability | Why it's Must |
 |------------|---------------|
 | User registration + login + email verification (Attendee, Organizer) | Identity is foundational |
-| Organizer onboarding + Super Admin approval | Quality gate; trust signal |
+| Organizer onboarding + Super Admin approval (Approve / Reject / **Request Resubmission**) | Quality gate; trust signal; resubmission unblocks borderline orgs |
+| **Organizer profile edit — non-sensitive fields** (logo, description, contact phone, address) | Otherwise every typo becomes a support ticket |
+| **Organizer profile edit — sensitive fields** (Org Name, PAN, GSTIN, Business Reg) → admin re-approval workflow | Identity-drift / fraud prevention |
 | Event creation + publishing | Core organizer value |
-| Ticket categories + pricing + inventory | Required to issue tickets |
+| Ticket categories + **informational pricing** + inventory (no payment logic) | Required to issue tickets; price is display-only in V1 |
 | Public discovery + search + filter | Required for attendee acquisition |
-| Logged-in attendee booking (multi-category, multi-attendee) | Core attendee value |
-| Atomic inventory decrement (zero overselling) | Trust-critical |
-| QR ticket generation (HMAC-signed, one per ticket) | THE differentiator |
+| Logged-in attendee booking (multi-category, multi-attendee) — **instant confirmation only** | Core attendee value |
+| Atomic inventory decrement + **per-attendee per-event ticket cap** (zero overselling, anti-hoarding) | Trust-critical |
+| QR ticket generation (HMAC-signed, one per ticket, generated on Confirm) | THE differentiator |
 | Browser-based QR check-in + manual lookup | Validates the loop |
-| SMTP transactional emails (verification, booking confirmation, cancellation, event change, reminders) | Operational lifeline |
-| Booking self-cancellation (≥24h) | Standard expectation |
-| Coupon engine (organizer + global) | Required for promotions |
-| Reviews (post-checkin) | Quality signal |
-| Super Admin / Organizer / Attendee dashboards (basic KPIs + CSV exports) | Operational visibility |
-| Audit log (organizer state, scan, admin actions) | Compliance + dispute resolution |
+| SMTP transactional emails (verification, booking confirmation + PDF, cancellation, event change, reminders, organizer lifecycle) | Operational lifeline |
+| Booking self-cancellation (≥24 h, restores inventory, no refund computation) | Standard expectation |
+| Coupon engine (organizer + global) + **basic redemption stats** (count + revenue impact) | Required for promotions; stats needed by organizer dashboard |
+| Reviews (post check-in only) | Quality signal |
+| Super Admin / Organizer / Attendee dashboards (KPIs + CSV exports) | Operational visibility |
+| Audit log (organizer state, scan, admin actions, **booking + cancel events**) | Compliance + dispute resolution |
+| **DPDP consent ledger** (T&C version, IP, UA, timestamp on signup + on each booking) | Indian data-protection compliance baseline |
 | Privacy + T&C + cookie banner | Legal minimum |
 | Health endpoint + structured logs + daily backups | Operational baseline |
 
@@ -52,12 +80,13 @@ High value, but MVP can launch without — workarounds exist.
 
 | Capability | Defer rationale |
 |------------|-----------------|
-| Resubmission Pending workflow (third approval outcome) | Approve/Reject suffices for first 50 organizers; "request more info" can be done out-of-band via email |
-| Sensitive-field re-review on profile edit | Lock all profile edits during V1 if needed; relax in V1.1 |
 | Aggregate ratings on organizer profile | Event-level rating is the priority; org-level is derived |
 | ICS calendar download | Nice-to-have polish |
 | Charts on dashboards | KPI cards + tables suffice for first 10–20 organizers |
 | Staff event-assignment UX (vs simple "any of my events") | Simpler model works at low scale |
+| Coupon analytics drill-down (per-coupon time series, attendee segmentation) | Basic count + revenue stats ship in MVP; deeper analytics V1.1 |
+| Attendee data export (DPDP "download my data") | Legal expectation but enforceable on request in V1; self-serve in V1.1 |
+| Account deletion with anonymized retention (DPDP "erasure") | Deactivation suffices for V1; full erasure flow V1.1 |
 
 ### COULD HAVE (V1.x)
 Worthwhile but explicitly post-MVP.
@@ -74,7 +103,7 @@ Worthwhile but explicitly post-MVP.
 ### WON'T HAVE (V1) — explicitly deferred
 Listed in Mary's scope baseline — confirming PM agrees:
 
-- Online payment gateway · refunds · SMS · push · seat maps · monetization plans · white-label · native apps · SSO · recurring events · waitlist · invite-only CSV · offline check-in · geo maps · multi-language UI · multi-country · RBAC sub-roles · custom organizer questions · advanced GST invoicing
+- **Online payment gateway · payment intent · payment status · refunds · transaction ledger** · SMS · push · seat maps · monetization plans · white-label · native apps · SSO · recurring events · waitlist · invite-only CSV · offline check-in · geo maps · multi-language UI · multi-country · RBAC sub-roles · custom organizer questions · advanced GST invoicing · **reserved / pay-later / hold-then-pay flows of any kind**
 
 ---
 
@@ -82,16 +111,13 @@ Listed in Mary's scope baseline — confirming PM agrees:
 
 I'm not here to rubber-stamp. Three places I push back:
 
-### Challenge #1 — "Reserved / Pay Later" booking mode
-**My concern:** Indians don't reserve concert tickets without paying. This mode might generate phantom bookings and inventory hoarding.
-**Decision:** Keep it (BA locked) BUT enforce two PM safeguards:
-- Show a clear "Reserved — Pay at Venue" badge on the attendee booking & ticket
-- Track **no-show rate per organizer**; if > 40%, surface to admin in dashboard
-- Add a **per-attendee active-reservation cap** (e.g., max 3 unpaid reservations across all events) to limit hoarding — *new business rule for the PRD*
+### Challenge #1 — Anti-hoarding under instant-confirm + free pricing
+**My concern:** With informational pricing + instant confirm + no payment friction, a single attendee can grab 50 tickets to a popular free event in seconds, blocking real attendees.
+**Decision (locked with BA):** Enforce **BR-NEW-01** — per attendee, per event, max 10 tickets across all categories in V1. Validated atomically inside US-E5-005 confirm transaction. Configurable per organizer in V1.1. *No "reservation" / "hold" state — confirmed bookings only, capped by count.*
 
 ### Challenge #2 — "100+ organizers in 6 months"
 **My concern:** With self-serve signup + manual admin approval + no marketing budget, 100 is aggressive.
-**Decision:** Split into measurable sub-targets in the success metric — *50 onboarded by month 3, 100 by month 6* — and add a "seed organizer" outreach plan to the launch playbook.
+**Decision:** Split into measurable sub-targets — *50 onboarded by month 3, 100 by month 6* — and add a "seed organizer" outreach plan to the launch playbook.
 
 ### Challenge #3 — Browser-only check-in scanner
 **My concern:** Venue WiFi reliability is a real risk in India. We accepted "online only" for V1, but I want a graceful failure mode.
@@ -125,21 +151,26 @@ Scoring: **R**each (1-5), **I**mpact (1-5), **C**onfidence (%), **E**ffort (stor
 
 ---
 
-## 5. MVP Cut-Line Decisions
+## 5. MVP Cut-Line Decisions (Revised after BA validation)
 
 | Capability | In MVP? | Rationale |
 |------------|---------|-----------|
-| Resubmission Pending state | ❌ → V1.1 | Approve/Reject covers 80% |
-| Sensitive-field re-review | ❌ → V1.1 | Out-of-band admin handling acceptable at low scale |
+| Resubmission Pending state (US-E2-005) | ✅ **Promoted to MVP (P1, S3)** | Required to onboard 100 orgs without rigid Approve/Reject |
+| Org profile edit — non-sensitive (US-E1-010a NEW) | ✅ **MVP P0, S2** | Otherwise every typo = DB hand-edit |
+| Org profile edit — sensitive + admin re-review (US-E2-007) | ✅ **Promoted to MVP P1, S8** | Identity-drift prevention; user-mandated |
+| Coupon redemption stats (US-E5-013) | ✅ **Promoted to MVP P0, S9** | Organizer dashboard depends on it |
+| DPDP consent ledger (US-E10-008 NEW) | ✅ **MVP P0, S1** | Indian compliance baseline |
 | 2-hour reminder email | ❌ → V1.1 | 24h is enough |
 | ICS calendar download | ❌ → V1.1 | Polish, not value |
 | Private event access code | ❌ → V1.1 | Unlisted URL covers it |
 | Multi-gallery images (3) | ❌ → V1.1 | Banner sufficient |
-| Coupon redemption dashboard | ❌ → V1.1 | CSV export sufficient |
+| Coupon analytics drill-down | ❌ → V1.1 | Basic count/revenue ships in MVP |
 | Charts on dashboards | ❌ → V1.1 | KPI cards + tables OK |
 | Aggregate organizer rating | ❌ → V1.1 | Event ratings only at MVP |
+| Attendee data export (US-E10-009 NEW) | ❌ → V1.1 | On-request via admin in V1 |
+| Account deletion w/ anonymization (US-E10-010 NEW) | ❌ → V1.1 | Deactivation (US-E1-011) suffices for V1 |
 
-**Net effect:** ~10–15 stories trimmed from MVP, accelerating launch by ~1 sprint.
+**Net effect:** +5 stories promoted into MVP (org edit split, resubmission, sensitive re-review, coupon stats, consent ledger). MVP grows by ~17 SP but eliminates 5 critical gaps. New MVP total = ~278 SP across **9 sprints**.
 
 ---
 

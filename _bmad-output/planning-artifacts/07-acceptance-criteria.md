@@ -170,6 +170,15 @@ Scenario: Cancel cascades to bookings
   And all 50 bookings transition to "Cancelled by Organizer"
   And all 100 ticket QR tokens become invalid
   And cancellation emails are queued for 50 attendees
+
+Scenario: Scan attempt on cancelled-event ticket (CR-1)
+  Given an event was cancelled by its organizer
+  And a ticket for that event was previously "Issued" with a valid QR
+  When check-in staff scans the QR
+  Then the system returns scan outcome "Cancelled"
+  And UI shows red "Cancelled—Event was cancelled by organizer"
+  And no state change occurs
+  And the scan attempt is recorded in the scan audit log
 ```
 
 ### US-E3-011 — Auto-Completion
@@ -255,6 +264,15 @@ Scenario: Cancellation blocked within 24h
   Given my booking is for an event 12 hours from now
   When I attempt to cancel
   Then the system rejects with "Cancellation window closed"
+
+Scenario: Scan attempt on attendee-cancelled ticket (CR-2)
+  Given I cancelled my booking earlier today (event is tomorrow)
+  And I still possess my original QR PDF
+  When check-in staff scans the QR
+  Then the system returns scan outcome "Cancelled"
+  And UI shows red "Cancelled—Booking cancelled by attendee"
+  And no state change occurs
+  And the scan attempt is recorded in the scan audit log
 ```
 
 ### US-E5-003 — Coupon Validation Errors
@@ -319,6 +337,7 @@ Scenario: Cancelled ticket
   Given a ticket was cancelled
   When I scan it
   Then UI shows red "Cancelled Ticket"
+  And the scan outcome "Cancelled" applies whether the cancellation source was attendee-self-cancel (US-E5-010) OR organizer-event-cancel (US-E3-009)
 
 Scenario: Expired
   Given event ended 3 hours ago (past 2h grace)
@@ -366,21 +385,44 @@ Scenario: Retry failed sends
 
 ### US-E8-001 — Review Eligibility
 ```gherkin
-Scenario: Only checked-in attendees can review
-  Given I have a ticket marked "Checked In" for event E
+Scenario: Only checked-in attendees can review (offline / hybrid events)
+  Given event E is offline or hybrid
+  And I have a ticket marked "Checked In" for event E
   When I open the event page
   Then I see a Review form
 
+Scenario: Online event—no scan required (CR-3)
+  Given event E is an online event
+  And event E has status "Completed"
+  And I have a confirmed (non-cancelled) booking for event E
+  When I open the event page
+  Then I see a Review form
+  # Online events skip QR check-in entirely; eligibility = Confirmed booking + event Completed
+
+Scenario: Online event not yet completed
+  Given event E is an online event with status "Published" (not yet Completed)
+  And I have a confirmed booking for event E
+  When I open the event page
+  Then no Review form is shown
+
 Scenario: Non-attendee blocked
-  Given I never checked in for event E
+  Given I never checked in for event E (offline) OR I have no confirmed booking (online)
   When I open the event page
   Then no Review form is shown
   And direct API attempt returns 403
+
+Scenario: Cancelled booking blocked from reviewing online event
+  Given event E is online and Completed
+  And my booking for event E was Cancelled
+  When I open the event page
+  Then no Review form is shown
 
 Scenario: Comment length enforced
   When I submit a comment of 600 characters
   Then validation rejects with "Maximum 500 characters"
 ```
+
+**Cross-cutting note for online events (CR-3):** Online events bypass the entire check-in flow (US-E6-001..006). The scanner UI is not relevant for online events; check-in staff are not required; QR codes are still issued (for consistency and proof-of-purchase) but are never scanned. Review eligibility for online events is computed as `booking.Status = Confirmed AND event.Status = Completed`.
 
 ---
 
