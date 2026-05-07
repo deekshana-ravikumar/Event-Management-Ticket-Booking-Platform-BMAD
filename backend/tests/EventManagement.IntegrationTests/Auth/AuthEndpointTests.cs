@@ -96,15 +96,17 @@ public sealed class AuthEndpointTests : IClassFixture<CustomWebApplicationFactor
     {
         var payload = new
         {
-            fullName = "Priya Sharma",
+            orgName = "Tech Events Ltd",
+            contactPerson = "Priya Sharma",
             email = $"org_{Guid.NewGuid():N}@example.com",
             phone = "9876543210",
-            city = "Bangalore",
+            category = "Technology",
             password = "Str0ng@Pass!",
             confirmPassword = "Str0ng@Pass!",
-            organizationName = "Tech Events Ltd",
-            contactPerson = "Priya Sharma",
-            category = "Technology",
+            address = "42, MG Road",
+            city = "Bangalore",
+            state = "Karnataka",
+            pincode = "560001",
             tncVersion = "2026-05-01"
         };
 
@@ -236,15 +238,17 @@ public sealed class AuthEndpointTests : IClassFixture<CustomWebApplicationFactor
         // Register organizer
         await _client.PostAsJsonAsync("/api/auth/register/organizer", new
         {
-            fullName = "Org User",
+            orgName = "My Org",
+            contactPerson = "Org User",
             email,
             phone = "9876543210",
-            city = "Hyderabad",
+            category = "Tech",
             password,
             confirmPassword = password,
-            organizationName = "My Org",
-            contactPerson = "Org User",
-            category = "Tech",
+            address = "1 Tech Park",
+            city = "Hyderabad",
+            state = "Telangana",
+            pincode = "500081",
             tncVersion = "2026-05-01"
         });
 
@@ -269,15 +273,17 @@ public sealed class AuthEndpointTests : IClassFixture<CustomWebApplicationFactor
 
         await _client.PostAsJsonAsync("/api/auth/register/organizer", new
         {
-            fullName = "Guard Test",
+            orgName = "Guard Org",
+            contactPerson = "Guard Test",
             email,
             phone = "9876543210",
-            city = "Chennai",
+            category = "Education",
             password,
             confirmPassword = password,
-            organizationName = "Guard Org",
-            contactPerson = "Guard Test",
-            category = "Education",
+            address = "5 School Lane",
+            city = "Chennai",
+            state = "Tamil Nadu",
+            pincode = "600001",
             tncVersion = "2026-05-01"
         });
 

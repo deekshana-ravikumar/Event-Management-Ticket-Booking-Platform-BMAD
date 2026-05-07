@@ -1,12 +1,12 @@
+using EventManagement.Application.Common.Interfaces;
 using EventManagement.Domain.Enums;
 using EventManagement.Domain.Exceptions;
-using EventManagement.Infrastructure.Persistence;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 
 namespace EventManagement.Application.Features.Auth.VerifyEmail;
 
-public sealed class VerifyEmailCommandHandler(AppDbContext db)
+public sealed class VerifyEmailCommandHandler(IAppDbContext db)
     : IRequestHandler<VerifyEmailCommand, Unit>
 {
     public async Task<Unit> Handle(VerifyEmailCommand request, CancellationToken cancellationToken)

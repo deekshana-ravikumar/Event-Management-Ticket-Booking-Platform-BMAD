@@ -3,7 +3,6 @@ using EventManagement.Application.Common.Settings;
 using EventManagement.Domain.Entities;
 using EventManagement.Domain.Enums;
 using EventManagement.Domain.Exceptions;
-using EventManagement.Infrastructure.Persistence;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
@@ -11,7 +10,7 @@ using Microsoft.Extensions.Options;
 namespace EventManagement.Application.Features.Auth.RegisterOrganizer;
 
 public sealed class RegisterOrganizerCommandHandler(
-    AppDbContext db,
+    IAppDbContext db,
     IPasswordHasher passwordHasher,
     IEmailService emailService,
     IConsentLedgerService consentLedger,
@@ -41,7 +40,8 @@ public sealed class RegisterOrganizerCommandHandler(
             Status = UserStatus.PendingVerification
         };
 
-        var rawToken = Convert.ToBase64String(System.Security.Cryptography.RandomNumberGenerator.GetBytes(64));
+        var rawToken = Convert.ToBase64String(System.Security.Cryptography.RandomNumberGenerator.GetBytes(64))
+            .Replace('+', '-').Replace('/', '_').TrimEnd('=');
         user.EmailVerificationTokens.Add(new EmailVerificationToken
         {
             Token = rawToken,

@@ -1,8 +1,9 @@
 using System.Text.Encodings.Web;
-using EventManagement.API.Configuration;
 using EventManagement.Application.Common.Interfaces;
+using EventManagement.Application.Common.Settings;
 using MailKit.Net.Smtp;
 using MailKit.Security;
+using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using MimeKit;
@@ -11,6 +12,7 @@ namespace EventManagement.Infrastructure.Services;
 
 public sealed class EmailService(
     IOptions<SmtpSettings> settings,
+    IHostEnvironment hostEnvironment,
     ILogger<EmailService> logger) : IEmailService
 {
     private readonly SmtpSettings _settings = settings.Value;
@@ -49,8 +51,20 @@ public sealed class EmailService(
         }
         catch (Exception ex)
         {
-            logger.LogError(ex, "Failed to send verification email (SMTP error)");
-            throw;
+            logger.LogError(ex, "SMTP dispatch failed ({ExceptionType})", ex.GetType().Name);
+
+            if (hostEnvironment.IsDevelopment())
+            {
+                // Dev fallback: SMTP unavailable (no MailHog running) — log token URL so
+                // local testing can proceed without an email server.
+                // WARNING: verification URL contains a live token — DEV ONLY.
+                logger.LogWarning(
+                    "[DEV] SMTP unavailable — copy this verification URL to complete registration: {VerificationUrl}",
+                    verificationUrl);
+                return; // Do NOT break local development flows
+            }
+
+            throw; // Production: surface the failure
         }
     }
 

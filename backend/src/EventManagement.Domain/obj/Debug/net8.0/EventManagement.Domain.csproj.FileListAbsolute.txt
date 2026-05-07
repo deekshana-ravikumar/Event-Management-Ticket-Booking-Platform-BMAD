@@ -1,0 +1,12 @@
+E:\BMAD_Event_Management\Event-Management-Ticket-Booking-Platform-BMAD\backend\src\EventManagement.Domain\bin\Debug\net8.0\EventManagement.Domain.deps.json
+E:\BMAD_Event_Management\Event-Management-Ticket-Booking-Platform-BMAD\backend\src\EventManagement.Domain\bin\Debug\net8.0\EventManagement.Domain.dll
+E:\BMAD_Event_Management\Event-Management-Ticket-Booking-Platform-BMAD\backend\src\EventManagement.Domain\bin\Debug\net8.0\EventManagement.Domain.pdb
+E:\BMAD_Event_Management\Event-Management-Ticket-Booking-Platform-BMAD\backend\src\EventManagement.Domain\obj\Debug\net8.0\EventManagement.Domain.GeneratedMSBuildEditorConfig.editorconfig
+E:\BMAD_Event_Management\Event-Management-Ticket-Booking-Platform-BMAD\backend\src\EventManagement.Domain\obj\Debug\net8.0\EventManagement.Domain.AssemblyInfoInputs.cache
+E:\BMAD_Event_Management\Event-Management-Ticket-Booking-Platform-BMAD\backend\src\EventManagement.Domain\obj\Debug\net8.0\EventManagement.Domain.AssemblyInfo.cs
+E:\BMAD_Event_Management\Event-Management-Ticket-Booking-Platform-BMAD\backend\src\EventManagement.Domain\obj\Debug\net8.0\EventManagement.Domain.csproj.CoreCompileInputs.cache
+E:\BMAD_Event_Management\Event-Management-Ticket-Booking-Platform-BMAD\backend\src\EventManagement.Domain\obj\Debug\net8.0\EventManagement.Domain.sourcelink.json
+E:\BMAD_Event_Management\Event-Management-Ticket-Booking-Platform-BMAD\backend\src\EventManagement.Domain\obj\Debug\net8.0\EventManagement.Domain.dll
+E:\BMAD_Event_Management\Event-Management-Ticket-Booking-Platform-BMAD\backend\src\EventManagement.Domain\obj\Debug\net8.0\refint\EventManagement.Domain.dll
+E:\BMAD_Event_Management\Event-Management-Ticket-Booking-Platform-BMAD\backend\src\EventManagement.Domain\obj\Debug\net8.0\EventManagement.Domain.pdb
+E:\BMAD_Event_Management\Event-Management-Ticket-Booking-Platform-BMAD\backend\src\EventManagement.Domain\obj\Debug\net8.0\ref\EventManagement.Domain.dll

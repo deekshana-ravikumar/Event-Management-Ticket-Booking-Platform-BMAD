@@ -169,9 +169,9 @@ These four stories form the **unbreakable atomic unit** of the platform. Nothing
 
 | # | Task | Notes |
 |---|------|-------|
-| D-01 | MySQL 8 instance (Docker for local dev) | `docker-compose.yml`: mysql:8.0 + MailHog |
-| D-02 | Create databases: `eventmgmt_dev`, `eventmgmt_test` | Separate test DB for integration tests |
-| D-03 | Create EF Core initial migration (empty) | `dotnet ef migrations add InitialCreate` |
+| D-01 | MySQL 8 instance | Local install (recommended for dev) **or** Docker: `docker compose up -d` in `backend/` |
+| D-02 | Create database: `eventmanagement_dev` | See §4.6 Local Development Setup below |
+| D-03 | Create EF Core S1 migration | `dotnet ef migrations add S1_AuthCore --project EventManagement.Infrastructure --startup-project EventManagement.API` (run from `backend/` — adjust to `src/EventManagement.*` if your solution uses a `/src` subfolder) |
 | D-04 | Plan V1 schema (see §4.5) | Run migration before Story 1 coding |
 | D-05 | Configure connection string per env via env vars only | Never commit credentials |
 | D-06 | Set up Hangfire schema (created automatically on first run) | — |
@@ -307,6 +307,101 @@ SMTP config for dev: `host=localhost, port=1025, no auth`. MailHog captures all 
 Story 1 file written to: `DEV-01-story-auth-core.md`
 
 See that file for full AC mapping, file-level tasks, and test cases.
+
+---
+
+## 4.6 Local Development Setup (No Docker Required)
+
+This section documents the minimal steps to run DEV-01A locally with a native MySQL install and no MailHog.
+
+### Prerequisites
+- .NET 8 SDK
+- MySQL 8 running locally on port 3306
+- `dotnet-ef` tool: `dotnet tool install --global dotnet-ef`
+
+### Step 1 — Create the database
+
+```sql
+-- Run in MySQL Workbench / mysql CLI
+CREATE DATABASE IF NOT EXISTS eventmanagement_dev CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+```
+
+### Step 2 — Configure appsettings.Development.json
+
+File: `EventManagement.API/appsettings.Development.json`
+
+Update the `DefaultConnection` string to match your local MySQL credentials:
+
+```json
+"ConnectionStrings": {
+  "DefaultConnection": "Server=localhost;Port=3306;Database=eventmanagement_dev;User=root;Password=YOUR_MYSQL_PASSWORD;"
+}
+```
+
+### Step 3 — Set JWT_SECRET environment variable
+
+```powershell
+# PowerShell (current session)
+$env:JWT_SECRET = "your-local-dev-secret-minimum-32-characters!!"
+
+# Or persist for the session in a .env approach (never commit this value)
+```
+
+> JWT_SECRET must be ≥ 32 characters. The app throws `InvalidOperationException` at startup if missing.
+
+### Step 4 — Run EF migrations
+
+From the `backend/` directory (where `EventManagement.sln` lives):
+
+```powershell
+# If projects are directly in backend/ (no /src subfolder)
+dotnet ef migrations add S1_AuthCore `
+  --project EventManagement.Infrastructure `
+  --startup-project EventManagement.API
+
+dotnet ef database update `
+  --project EventManagement.Infrastructure `
+  --startup-project EventManagement.API
+
+# If projects are under backend/src/
+dotnet ef migrations add S1_AuthCore `
+  --project src/EventManagement.Infrastructure `
+  --startup-project src/EventManagement.API
+
+dotnet ef database update `
+  --project src/EventManagement.Infrastructure `
+  --startup-project src/EventManagement.API
+```
+
+### Step 5 — Run the API
+
+```powershell
+# From backend/ directory
+dotnet run --project EventManagement.API
+# or: dotnet run --project src/EventManagement.API
+
+# Swagger UI: http://localhost:5000/swagger
+```
+
+### Email verification without MailHog
+
+The `EmailService` has a built-in dev fallback. When SMTP on `localhost:1025` is unreachable (no MailHog), the service logs the verification URL to the console instead of throwing:
+
+```
+[WRN] [DEV] SMTP unavailable — copy this verification URL to complete registration: http://localhost:4200/verify-email?token=...
+```
+
+Copy the URL from the API console output and open it in your browser to complete the registration flow.
+
+> **Production note:** In any environment other than `Development`, SMTP failures are re-thrown. Run MailHog or configure a real SMTP relay before deploying.
+
+### Step 6 — Run tests
+
+```powershell
+dotnet test
+```
+
+Integration tests use EF InMemory — no MySQL connection required to run the test suite.
 
 ---
 

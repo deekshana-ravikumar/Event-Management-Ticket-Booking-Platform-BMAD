@@ -2,7 +2,6 @@ using EventManagement.Application.Common.Interfaces;
 using EventManagement.Application.Common.Settings;
 using EventManagement.Domain.Entities;
 using EventManagement.Domain.Enums;
-using EventManagement.Infrastructure.Persistence;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
@@ -10,7 +9,7 @@ using Microsoft.Extensions.Options;
 namespace EventManagement.Application.Features.Auth.ResendVerificationEmail;
 
 public sealed class ResendVerificationEmailCommandHandler(
-    AppDbContext db,
+    IAppDbContext db,
     IEmailService emailService,
     IOptions<FrontendSettings> frontendSettings)
     : IRequestHandler<ResendVerificationEmailCommand, Unit>
@@ -38,7 +37,8 @@ public sealed class ResendVerificationEmailCommandHandler(
             t.UsedAt = DateTime.UtcNow;
 
         // Issue new token
-        var rawToken = Convert.ToBase64String(System.Security.Cryptography.RandomNumberGenerator.GetBytes(64));
+        var rawToken = Convert.ToBase64String(System.Security.Cryptography.RandomNumberGenerator.GetBytes(64))
+            .Replace('+', '-').Replace('/', '_').TrimEnd('=');
         var newToken = new EmailVerificationToken
         {
             UserId = user.Id,

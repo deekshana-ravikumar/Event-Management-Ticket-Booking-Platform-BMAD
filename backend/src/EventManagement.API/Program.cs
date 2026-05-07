@@ -3,6 +3,7 @@ using EventManagement.API.Configuration;
 using EventManagement.API.Middleware;
 using EventManagement.API.Middleware.Authorization;
 using EventManagement.Application;
+using EventManagement.Application.Common.Settings;
 using EventManagement.Infrastructure;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
@@ -30,7 +31,9 @@ try
                "[{Timestamp:HH:mm:ss} {Level:u3}] [{CorrelationId}] {Message:lj}{NewLine}{Exception}"));
 
     // ─── JWT Secret from environment (mandatory, never from config file) ──────
+    // builder.Configuration["JWT_SECRET"] allows WebApplicationFactory to inject via UseSetting in tests
     var jwtSecret = Environment.GetEnvironmentVariable("JWT_SECRET")
+        ?? builder.Configuration["JWT_SECRET"]
         ?? throw new InvalidOperationException(
             "JWT_SECRET environment variable must be set before starting the application.");
 
@@ -131,7 +134,11 @@ try
         app.UseSwaggerUI();
     }
 
-    app.UseHttpsRedirection();
+    if (!app.Environment.IsDevelopment())
+    {
+        app.UseHttpsRedirection();
+    }
+
     app.UseCors("AllowFrontend");
 
     app.UseMiddleware<CorrelationIdMiddleware>();

@@ -21,6 +21,7 @@ public sealed class ActiveOrganizerHandler(AppDbContext db)
             return;
         }
 
+        // Note: role gating (RequireRole("Organizer")) is enforced at policy level before this handler runs.
         // Always live DB lookup — never cache org status in JWT (design decision: no stale data risk)
         var org = await db.Organizations
             .AsNoTracking()

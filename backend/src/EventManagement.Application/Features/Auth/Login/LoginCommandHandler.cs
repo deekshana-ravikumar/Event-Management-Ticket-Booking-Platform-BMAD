@@ -2,14 +2,13 @@ using EventManagement.Application.Common.Interfaces;
 using EventManagement.Domain.Entities;
 using EventManagement.Domain.Enums;
 using EventManagement.Domain.Exceptions;
-using EventManagement.Infrastructure.Persistence;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 
 namespace EventManagement.Application.Features.Auth.Login;
 
 public sealed class LoginCommandHandler(
-    AppDbContext db,
+    IAppDbContext db,
     IPasswordHasher passwordHasher,
     IJwtTokenService jwtTokenService)
     : IRequestHandler<LoginCommand, LoginResult>
@@ -45,7 +44,7 @@ public sealed class LoginCommandHandler(
         db.LoginAttempts.Add(attempt);
 
         var rawRefreshToken = jwtTokenService.GenerateRefreshTokenRaw();
-        db.RefreshTokens.Add(new RefreshToken
+        db.RefreshTokens.Add(new Domain.Entities.RefreshToken
         {
             UserId = user.Id,
             TokenHash = jwtTokenService.HashToken(rawRefreshToken),

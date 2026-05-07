@@ -1,10 +1,10 @@
-using EventManagement.Infrastructure.Persistence;
+using EventManagement.Application.Common.Interfaces;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 
 namespace EventManagement.Application.Features.Auth.Logout;
 
-public sealed class LogoutCommandHandler(AppDbContext db) : IRequestHandler<LogoutCommand, Unit>
+public sealed class LogoutCommandHandler(IAppDbContext db) : IRequestHandler<LogoutCommand, Unit>
 {
     public async Task<Unit> Handle(LogoutCommand request, CancellationToken cancellationToken)
     {

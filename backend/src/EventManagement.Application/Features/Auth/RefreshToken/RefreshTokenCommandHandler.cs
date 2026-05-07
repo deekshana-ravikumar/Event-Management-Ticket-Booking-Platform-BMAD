@@ -1,14 +1,13 @@
 using EventManagement.Application.Common.Interfaces;
 using EventManagement.Domain.Entities;
 using EventManagement.Domain.Exceptions;
-using EventManagement.Infrastructure.Persistence;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 
 namespace EventManagement.Application.Features.Auth.RefreshToken;
 
 public sealed class RefreshTokenCommandHandler(
-    AppDbContext db,
+    IAppDbContext db,
     IJwtTokenService jwtTokenService)
     : IRequestHandler<RefreshTokenCommand, RefreshTokenResult>
 {

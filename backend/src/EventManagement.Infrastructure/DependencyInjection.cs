@@ -1,4 +1,3 @@
-using EventManagement.API.Configuration;
 using EventManagement.Application.Common.Interfaces;
 using EventManagement.Application.Common.Settings;
 using EventManagement.Infrastructure.Persistence;
@@ -21,6 +20,8 @@ public static class DependencyInjection
         services.AddDbContext<AppDbContext>(options =>
             options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString),
                 mySqlOptions => mySqlOptions.EnableRetryOnFailure(3)));
+
+        services.AddScoped<IAppDbContext>(sp => sp.GetRequiredService<AppDbContext>());
 
         services.AddScoped<IPasswordHasher, PasswordHasher>();
         services.AddScoped<IJwtTokenService, JwtTokenService>();

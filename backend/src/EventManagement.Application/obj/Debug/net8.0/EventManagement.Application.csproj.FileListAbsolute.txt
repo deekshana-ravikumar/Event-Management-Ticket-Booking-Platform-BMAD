@@ -1,0 +1,16 @@
+E:\BMAD_Event_Management\Event-Management-Ticket-Booking-Platform-BMAD\backend\src\EventManagement.Application\obj\Debug\net8.0\EventManagement.Application.csproj.AssemblyReference.cache
+E:\BMAD_Event_Management\Event-Management-Ticket-Booking-Platform-BMAD\backend\src\EventManagement.Application\obj\Debug\net8.0\EventManagement.Application.GeneratedMSBuildEditorConfig.editorconfig
+E:\BMAD_Event_Management\Event-Management-Ticket-Booking-Platform-BMAD\backend\src\EventManagement.Application\obj\Debug\net8.0\EventManagement.Application.AssemblyInfoInputs.cache
+E:\BMAD_Event_Management\Event-Management-Ticket-Booking-Platform-BMAD\backend\src\EventManagement.Application\obj\Debug\net8.0\EventManagement.Application.AssemblyInfo.cs
+E:\BMAD_Event_Management\Event-Management-Ticket-Booking-Platform-BMAD\backend\src\EventManagement.Application\obj\Debug\net8.0\EventManagement.Application.csproj.CoreCompileInputs.cache
+E:\BMAD_Event_Management\Event-Management-Ticket-Booking-Platform-BMAD\backend\src\EventManagement.Application\obj\Debug\net8.0\EventManagement.Application.sourcelink.json
+E:\BMAD_Event_Management\Event-Management-Ticket-Booking-Platform-BMAD\backend\src\EventManagement.Application\bin\Debug\net8.0\EventManagement.Application.deps.json
+E:\BMAD_Event_Management\Event-Management-Ticket-Booking-Platform-BMAD\backend\src\EventManagement.Application\bin\Debug\net8.0\EventManagement.Application.dll
+E:\BMAD_Event_Management\Event-Management-Ticket-Booking-Platform-BMAD\backend\src\EventManagement.Application\bin\Debug\net8.0\EventManagement.Application.pdb
+E:\BMAD_Event_Management\Event-Management-Ticket-Booking-Platform-BMAD\backend\src\EventManagement.Application\bin\Debug\net8.0\EventManagement.Domain.dll
+E:\BMAD_Event_Management\Event-Management-Ticket-Booking-Platform-BMAD\backend\src\EventManagement.Application\bin\Debug\net8.0\EventManagement.Domain.pdb
+E:\BMAD_Event_Management\Event-Management-Ticket-Booking-Platform-BMAD\backend\src\EventManagement.Application\obj\Debug\net8.0\EventMan.37F6A844.Up2Date
+E:\BMAD_Event_Management\Event-Management-Ticket-Booking-Platform-BMAD\backend\src\EventManagement.Application\obj\Debug\net8.0\EventManagement.Application.dll
+E:\BMAD_Event_Management\Event-Management-Ticket-Booking-Platform-BMAD\backend\src\EventManagement.Application\obj\Debug\net8.0\refint\EventManagement.Application.dll
+E:\BMAD_Event_Management\Event-Management-Ticket-Booking-Platform-BMAD\backend\src\EventManagement.Application\obj\Debug\net8.0\EventManagement.Application.pdb
+E:\BMAD_Event_Management\Event-Management-Ticket-Booking-Platform-BMAD\backend\src\EventManagement.Application\obj\Debug\net8.0\ref\EventManagement.Application.dll

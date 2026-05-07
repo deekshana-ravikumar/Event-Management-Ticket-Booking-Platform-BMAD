@@ -3,7 +3,7 @@ using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
 using EventManagement.Application.Common.Interfaces;
-using EventManagement.API.Configuration;
+using EventManagement.Application.Common.Settings;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 

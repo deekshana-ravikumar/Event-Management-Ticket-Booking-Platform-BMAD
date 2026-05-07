@@ -1,10 +1,11 @@
+using EventManagement.Application.Common.Interfaces;
 using EventManagement.Domain.Entities;
 using EventManagement.Domain.Enums;
 using Microsoft.EntityFrameworkCore;
 
 namespace EventManagement.Infrastructure.Persistence;
 
-public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(options)
+public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(options), IAppDbContext
 {
     public DbSet<User> Users => Set<User>();
     public DbSet<EmailVerificationToken> EmailVerificationTokens => Set<EmailVerificationToken>();
