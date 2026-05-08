@@ -1,0 +1,109 @@
+<div class="auth-page">
+  <mat-card class="auth-card">
+    <mat-card-header>
+      <mat-card-title>Create Attendee Account</mat-card-title>
+    </mat-card-header>
+
+    <mat-card-content>
+      <form [formGroup]="form" (ngSubmit)="onSubmit()" novalidate>
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Full Name</mat-label>
+          <input matInput formControlName="fullName" placeholder="e.g. Raj Kumar" />
+          @if (form.get('fullName')?.invalid && form.get('fullName')?.touched) {
+            <mat-error>Full name is required</mat-error>
+          }
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Email Address</mat-label>
+          <input matInput type="email" formControlName="email" placeholder="raj@example.com" />
+          @if (form.get('email')?.errors?.['required'] && form.get('email')?.touched) {
+            <mat-error>Email is required</mat-error>
+          }
+          @if (form.get('email')?.errors?.['email'] && form.get('email')?.touched) {
+            <mat-error>Enter a valid email</mat-error>
+          }
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Phone Number</mat-label>
+          <span matTextPrefix>+91&nbsp;</span>
+          <input matInput formControlName="phone" placeholder="9876543210" maxlength="10" />
+          @if (form.get('phone')?.invalid && form.get('phone')?.touched) {
+            <mat-error>Enter a valid 10-digit Indian mobile number</mat-error>
+          }
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>City</mat-label>
+          <input matInput formControlName="city" placeholder="Chennai" />
+          @if (form.get('city')?.invalid && form.get('city')?.touched) {
+            <mat-error>City is required</mat-error>
+          }
+        </mat-form-field>
+
+        <!-- Password with strength meter -->
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Password</mat-label>
+          <input matInput [type]="hidePassword ? 'password' : 'text'" formControlName="password" />
+          <button mat-icon-button matSuffix type="button" (click)="hidePassword = !hidePassword" [attr.aria-label]="'Toggle password visibility'">
+            <mat-icon>{{ hidePassword ? 'visibility_off' : 'visibility' }}</mat-icon>
+          </button>
+        </mat-form-field>
+
+        @if (form.get('password')?.value) {
+          <div class="password-strength">
+            <mat-progress-bar [color]="passwordStrengthColor" mode="determinate" [value]="(passwordStrengthLevel / 5) * 100"></mat-progress-bar>
+            <small class="strength-label">{{ passwordStrengthLabel }}</small>
+          </div>
+          <ul class="password-rules">
+            <li [class.met]="!passwordErrors['minLength']">8+ characters</li>
+            <li [class.met]="!passwordErrors['uppercase']">At least 1 uppercase</li>
+            <li [class.met]="!passwordErrors['lowercase']">At least 1 lowercase</li>
+            <li [class.met]="!passwordErrors['digit']">At least 1 digit</li>
+            <li [class.met]="!passwordErrors['special']">At least 1 special character</li>
+          </ul>
+        }
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Confirm Password</mat-label>
+          <input matInput [type]="hideConfirm ? 'password' : 'text'" formControlName="confirmPassword" />
+          <button mat-icon-button matSuffix type="button" (click)="hideConfirm = !hideConfirm" [attr.aria-label]="'Toggle confirm password visibility'">
+            <mat-icon>{{ hideConfirm ? 'visibility_off' : 'visibility' }}</mat-icon>
+          </button>
+          @if (form.errors?.['passwordMismatch'] && form.get('confirmPassword')?.touched) {
+            <mat-error>Passwords do not match</mat-error>
+          }
+        </mat-form-field>
+
+        <mat-checkbox formControlName="termsAccepted" color="primary" class="terms-checkbox">
+          I agree to the <a routerLink="/terms" target="_blank">Terms &amp; Conditions</a> and <a routerLink="/privacy" target="_blank">Privacy Policy</a>
+        </mat-checkbox>
+        @if (form.get('termsAccepted')?.invalid && form.get('termsAccepted')?.touched) {
+          <mat-error class="terms-error">You must accept the terms to continue</mat-error>
+        }
+
+        @if (serverError) {
+          <p class="server-error">{{ serverError }}</p>
+        }
+
+        <button
+          mat-raised-button
+          color="primary"
+          type="submit"
+          class="full-width submit-btn"
+          [disabled]="form.invalid || loading"
+        >
+          @if (loading) {
+            <mat-spinner diameter="20"></mat-spinner>
+          } @else {
+            Create Account
+          }
+        </button>
+
+        <p class="login-link">Already have an account? <a routerLink="/login">Sign in</a></p>
+      </form>
+    </mat-card-content>
+  </mat-card>
+</div>

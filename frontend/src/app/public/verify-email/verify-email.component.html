@@ -1,0 +1,61 @@
+<div class="auth-page">
+  <mat-card class="auth-card">
+    <mat-card-content class="centered-content">
+
+      @switch (state) {
+        @case ('loading') {
+          <mat-spinner diameter="48"></mat-spinner>
+          <p>Verifying your email&hellip;</p>
+        }
+
+        @case ('success') {
+          <mat-icon color="primary" class="large-icon">check_circle</mat-icon>
+          <h2>Email Verified!</h2>
+          <p>Your email has been verified successfully.</p>
+          <a mat-raised-button color="primary" routerLink="/login">Login now &rarr;</a>
+        }
+
+        @case ('error') {
+          <mat-icon color="warn" class="large-icon">error_outline</mat-icon>
+          <h2>Link Expired or Already Used</h2>
+          <p>{{ errorMessage }}</p>
+          <button mat-stroked-button color="primary" (click)="requestNewLink()">
+            Request new verification link
+          </button>
+        }
+
+        @case ('resend-form') {
+          <h2>Resend Verification Email</h2>
+          <p>Enter your email address to receive a new verification link.</p>
+          <form [formGroup]="resendForm" (ngSubmit)="submitResend()" novalidate class="full-width">
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>Email Address</mat-label>
+              <input matInput type="email" formControlName="email" />
+              @if (resendForm.get('email')?.invalid && resendForm.get('email')?.touched) {
+                <mat-error>Enter a valid email</mat-error>
+              }
+            </mat-form-field>
+            @if (resendError) {
+              <p class="server-error">{{ resendError }}</p>
+            }
+            <button mat-raised-button color="primary" type="submit" [disabled]="resendLoading" class="full-width">
+              @if (resendLoading) {
+                <mat-spinner diameter="20"></mat-spinner>
+              } @else {
+                Send Verification Email
+              }
+            </button>
+          </form>
+        }
+
+        @case ('resent') {
+          <mat-icon color="primary" class="large-icon">mark_email_read</mat-icon>
+          <h2>Verification Email Sent!</h2>
+          <p>New verification link sent! Check your inbox.</p>
+          <a mat-button routerLink="/login">Back to Sign In</a>
+        }
+      }
+
+    </mat-card-content>
+  </mat-card>
+</div>

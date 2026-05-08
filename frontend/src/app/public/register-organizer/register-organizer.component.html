@@ -1,0 +1,225 @@
+<div class="auth-page">
+  <mat-card class="auth-card wide-card">
+    <mat-card-header>
+      <mat-card-title>Register as Organiser</mat-card-title>
+    </mat-card-header>
+
+    <mat-card-content>
+      <mat-stepper [linear]="true" #stepper>
+
+        <!-- Step 1: Account -->
+        <mat-step [stepControl]="step1" label="Account">
+          <form [formGroup]="step1" novalidate>
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>Organisation Name</mat-label>
+              <input matInput formControlName="orgName" />
+              @if (step1.get('orgName')?.invalid && step1.get('orgName')?.touched) {
+                <mat-error>Organisation name is required</mat-error>
+              }
+            </mat-form-field>
+
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>Contact Person</mat-label>
+              <input matInput formControlName="contactPerson" />
+              @if (step1.get('contactPerson')?.invalid && step1.get('contactPerson')?.touched) {
+                <mat-error>Contact person is required</mat-error>
+              }
+            </mat-form-field>
+
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>Email Address</mat-label>
+              <input matInput type="email" formControlName="email" />
+              @if (step1.get('email')?.invalid && step1.get('email')?.touched) {
+                <mat-error>Valid email is required</mat-error>
+              }
+            </mat-form-field>
+
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>Phone</mat-label>
+              <span matTextPrefix>+91&nbsp;</span>
+              <input matInput formControlName="phone" maxlength="10" />
+              @if (step1.get('phone')?.invalid && step1.get('phone')?.touched) {
+                <mat-error>Enter a valid 10-digit mobile number</mat-error>
+              }
+            </mat-form-field>
+
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>Category</mat-label>
+              <mat-select formControlName="category">
+                @for (cat of categories; track cat) {
+                  <mat-option [value]="cat">{{ cat }}</mat-option>
+                }
+              </mat-select>
+              @if (step1.get('category')?.invalid && step1.get('category')?.touched) {
+                <mat-error>Category is required</mat-error>
+              }
+            </mat-form-field>
+
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>Password</mat-label>
+              <input matInput [type]="hidePassword ? 'password' : 'text'" formControlName="password" />
+              <button mat-icon-button matSuffix type="button" (click)="hidePassword = !hidePassword">
+                <mat-icon>{{ hidePassword ? 'visibility_off' : 'visibility' }}</mat-icon>
+              </button>
+            </mat-form-field>
+
+            @if (step1.get('password')?.value) {
+              <div class="password-strength">
+                <mat-progress-bar [color]="passwordStrengthColor" mode="determinate" [value]="(passwordStrengthLevel / 5) * 100"></mat-progress-bar>
+                <small>{{ passwordStrengthLabel }}</small>
+              </div>
+              <ul class="password-rules">
+                <li [class.met]="!passwordErrors['minLength']">8+ characters</li>
+                <li [class.met]="!passwordErrors['uppercase']">1 uppercase</li>
+                <li [class.met]="!passwordErrors['lowercase']">1 lowercase</li>
+                <li [class.met]="!passwordErrors['digit']">1 digit</li>
+                <li [class.met]="!passwordErrors['special']">1 special character</li>
+              </ul>
+            }
+
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>Confirm Password</mat-label>
+              <input matInput [type]="hideConfirm ? 'password' : 'text'" formControlName="confirmPassword" />
+              <button mat-icon-button matSuffix type="button" (click)="hideConfirm = !hideConfirm">
+                <mat-icon>{{ hideConfirm ? 'visibility_off' : 'visibility' }}</mat-icon>
+              </button>
+              @if (step1.errors?.['passwordMismatch'] && step1.get('confirmPassword')?.touched) {
+                <mat-error>Passwords do not match</mat-error>
+              }
+            </mat-form-field>
+
+            <div class="step-actions">
+              <button mat-raised-button color="primary" matStepperNext type="button" [disabled]="step1.invalid">
+                Next
+              </button>
+            </div>
+          </form>
+        </mat-step>
+
+        <!-- Step 2: Address -->
+        <mat-step [stepControl]="step2" label="Address">
+          <form [formGroup]="step2" novalidate>
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>Address</mat-label>
+              <textarea matInput formControlName="address" rows="3"></textarea>
+              @if (step2.get('address')?.invalid && step2.get('address')?.touched) {
+                <mat-error>Address is required</mat-error>
+              }
+            </mat-form-field>
+
+            <div class="two-col">
+              <mat-form-field appearance="outline" class="full-width">
+                <mat-label>City</mat-label>
+                <input matInput formControlName="city" />
+                @if (step2.get('city')?.invalid && step2.get('city')?.touched) {
+                  <mat-error>City is required</mat-error>
+                }
+              </mat-form-field>
+
+              <mat-form-field appearance="outline" class="full-width">
+                <mat-label>State</mat-label>
+                <input matInput formControlName="state" />
+                @if (step2.get('state')?.invalid && step2.get('state')?.touched) {
+                  <mat-error>State is required</mat-error>
+                }
+              </mat-form-field>
+            </div>
+
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>Pincode</mat-label>
+              <input matInput formControlName="pincode" maxlength="6" />
+              @if (step2.get('pincode')?.invalid && step2.get('pincode')?.touched) {
+                <mat-error>Enter a valid 6-digit pincode</mat-error>
+              }
+            </mat-form-field>
+
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>Website (optional)</mat-label>
+              <input matInput formControlName="website" />
+            </mat-form-field>
+
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>Social Links (optional)</mat-label>
+              <input matInput formControlName="socialLinks" placeholder="https://twitter.com/yourorg" />
+            </mat-form-field>
+
+            <div class="step-actions">
+              <button mat-button matStepperPrevious type="button">Back</button>
+              <button mat-raised-button color="primary" matStepperNext type="button" [disabled]="step2.invalid">Next</button>
+            </div>
+          </form>
+        </mat-step>
+
+        <!-- Step 3: Documents (optional) -->
+        <mat-step [stepControl]="step3" label="Documents">
+          <form [formGroup]="step3" novalidate>
+            <p class="help-text">All document fields are optional but may be required for verification.</p>
+
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>PAN Number (optional)</mat-label>
+              <input matInput formControlName="panNumber" />
+            </mat-form-field>
+
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>GSTIN (optional)</mat-label>
+              <input matInput formControlName="gstin" />
+            </mat-form-field>
+
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>ID Proof Reference (optional)</mat-label>
+              <input matInput formControlName="idProof" />
+            </mat-form-field>
+
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>Business Registration Number (optional)</mat-label>
+              <input matInput formControlName="businessRegistration" />
+            </mat-form-field>
+
+            <div class="step-actions">
+              <button mat-button matStepperPrevious type="button">Back</button>
+              <button mat-raised-button color="primary" matStepperNext type="button">Next</button>
+            </div>
+          </form>
+        </mat-step>
+
+        <!-- Step 4: Review & Submit -->
+        <mat-step [stepControl]="step4" label="Review">
+          <form [formGroup]="step4" (ngSubmit)="onSubmit()" novalidate>
+            <div class="review-summary">
+              <p><strong>Organisation:</strong> {{ step1.value.orgName }}</p>
+              <p><strong>Contact Person:</strong> {{ step1.value.contactPerson }}</p>
+              <p><strong>Email:</strong> {{ step1.value.email }}</p>
+              <p><strong>Phone:</strong> +91 {{ step1.value.phone }}</p>
+              <p><strong>Category:</strong> {{ step1.value.category }}</p>
+              <p><strong>City:</strong> {{ step2.value.city }}, {{ step2.value.state }}</p>
+            </div>
+
+            <mat-checkbox formControlName="termsAccepted" color="primary" class="terms-checkbox">
+              I agree to the <a routerLink="/terms" target="_blank">Terms &amp; Conditions</a>
+            </mat-checkbox>
+            @if (step4.get('termsAccepted')?.invalid && step4.get('termsAccepted')?.touched) {
+              <mat-error class="terms-error">You must accept the terms</mat-error>
+            }
+
+            @if (serverError) {
+              <p class="server-error">{{ serverError }}</p>
+            }
+
+            <div class="step-actions">
+              <button mat-button matStepperPrevious type="button">Back</button>
+              <button mat-raised-button color="primary" type="submit" [disabled]="step4.invalid || loading">
+                @if (loading) {
+                  <mat-spinner diameter="20"></mat-spinner>
+                } @else {
+                  Submit Registration
+                }
+              </button>
+            </div>
+          </form>
+        </mat-step>
+      </mat-stepper>
+
+      <p class="login-link">Already have an account? <a routerLink="/login">Sign in</a></p>
+    </mat-card-content>
+  </mat-card>
+</div>

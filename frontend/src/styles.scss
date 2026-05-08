@@ -1,0 +1,232 @@
+
+// Include theming for Angular Material with `mat.theme()`.
+// This Sass mixin will define CSS variables that are used for styling Angular Material
+// components according to the Material 3 design spec.
+// Learn more about theming and how to use it for your application's
+// custom components at https://material.angular.dev/guide/theming
+@use '@angular/material' as mat;
+
+html {
+  @include mat.theme((
+    color: (
+      primary: mat.$azure-palette,
+      tertiary: mat.$blue-palette,
+    ),
+    typography: Roboto,
+    density: 0,
+  ));
+}
+
+body {
+  // Default the application to a light color theme. This can be changed to
+  // `dark` to enable the dark color theme, or to `light dark` to defer to the
+  // user's system settings.
+  color-scheme: light;
+
+  // Set a default background, font and text colors for the application using
+  // Angular Material's system-level CSS variables. Learn more about these
+  // variables at https://material.angular.dev/guide/system-variables
+  background-color: var(--mat-sys-surface);
+  color: var(--mat-sys-on-surface);
+  font: var(--mat-sys-body-medium);
+
+  // Reset the user agent margin.
+  margin: 0;
+}
+
+/* ===========================
+   Design System Tokens (UX-13)
+   =========================== */
+:root {
+  --color-primary:    #1E40AF;
+  --color-secondary:  #0EA5E9;
+  --color-success:    #16A34A;
+  --color-warning:    #D97706;
+  --color-danger:     #DC2626;
+  --color-bg:         #F8FAFC;
+  --color-surface:    #FFFFFF;
+  --color-text:       #0F172A;
+  --color-text-secondary: #64748B;
+  --color-border:     #E2E8F0;
+  --radius-base:      8px;
+  --spacing-unit:     8px;
+}
+
+html, body {
+  height: 100%;
+  margin: 0;
+  font-family: Roboto, 'Helvetica Neue', sans-serif;
+  background-color: var(--color-bg);
+  color: var(--color-text);
+  font-size: 16px;
+}
+
+/* Auth page layout */
+.auth-page {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px 16px;
+  background-color: var(--color-bg);
+}
+
+.auth-card {
+  width: 100%;
+  max-width: 480px;
+  border-radius: var(--radius-base) !important;
+  box-shadow: 0 2px 16px rgba(0,0,0,0.1) !important;
+}
+
+.wide-card {
+  max-width: 680px;
+}
+
+.full-width {
+  width: 100%;
+  margin-bottom: 8px;
+}
+
+.submit-btn {
+  margin-top: 16px;
+  height: 48px;
+  font-size: 16px;
+}
+
+.server-error {
+  color: var(--color-danger);
+  font-size: 14px;
+  margin: 8px 0;
+}
+
+.success-text {
+  color: var(--color-success);
+  font-size: 14px;
+}
+
+.login-link, .register-link {
+  text-align: center;
+  margin-top: 16px;
+  font-size: 14px;
+  color: var(--color-text-secondary);
+}
+
+.forgot-link {
+  text-align: right;
+  margin-bottom: 8px;
+  font-size: 14px;
+}
+
+.terms-checkbox {
+  display: block;
+  margin: 8px 0;
+}
+
+.terms-error {
+  display: block;
+  color: var(--color-danger);
+  font-size: 12px;
+  margin-top: 4px;
+}
+
+.password-strength {
+  margin: 4px 0 8px 0;
+  .strength-label {
+    font-size: 12px;
+    color: var(--color-text-secondary);
+  }
+}
+
+.password-rules {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 12px 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 16px;
+
+  li {
+    font-size: 12px;
+    color: var(--color-danger);
+    &::before { content: '✗ '; }
+    &.met {
+      color: var(--color-success);
+      &::before { content: '✓ '; }
+    }
+  }
+}
+
+.two-col {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0 16px;
+}
+
+.centered-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 16px;
+  padding: 24px !important;
+}
+
+.large-icon {
+  font-size: 64px;
+  width: 64px;
+  height: 64px;
+}
+
+.pending-icon {
+  color: var(--color-warning);
+}
+
+.hint {
+  color: var(--color-text-secondary);
+  font-size: 14px;
+}
+
+.info-banner {
+  background: #EFF6FF;
+  border: 1px solid #BFDBFE;
+  border-radius: var(--radius-base);
+  padding: 12px;
+  margin: 8px 0;
+  font-size: 14px;
+}
+
+.step-actions {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+  margin-top: 16px;
+}
+
+.review-summary {
+  background: var(--color-bg);
+  border-radius: var(--radius-base);
+  padding: 16px;
+  margin-bottom: 16px;
+
+  p {
+    margin: 4px 0;
+    font-size: 14px;
+  }
+}
+
+.help-text {
+  font-size: 14px;
+  color: var(--color-text-secondary);
+  margin-bottom: 16px;
+}
+
+/* Responsive */
+@media (max-width: 599px) {
+  .two-col {
+    grid-template-columns: 1fr;
+    gap: 0;
+  }
+}
+
+html, body { height: 100%; }
+body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }

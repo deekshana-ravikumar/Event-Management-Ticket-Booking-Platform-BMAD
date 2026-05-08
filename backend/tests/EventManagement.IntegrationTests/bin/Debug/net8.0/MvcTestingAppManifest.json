@@ -1,6 +1,0 @@
-{
-  "EventManagement.API, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null": "E:\\BMAD_Event_Management\\Event-Management-Ticket-Booking-Platform-BMAD\\backend\\src\\EventManagement.API",
-  "EventManagement.Application, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null": "E:\\BMAD_Event_Management\\Event-Management-Ticket-Booking-Platform-BMAD\\backend\\src\\EventManagement.Application",
-  "EventManagement.Domain, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null": "E:\\BMAD_Event_Management\\Event-Management-Ticket-Booking-Platform-BMAD\\backend\\src\\EventManagement.Domain",
-  "EventManagement.Infrastructure, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null": "E:\\BMAD_Event_Management\\Event-Management-Ticket-Booking-Platform-BMAD\\backend\\src\\EventManagement.Infrastructure"
-}
